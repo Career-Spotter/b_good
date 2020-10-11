@@ -10,9 +10,20 @@ import (
 	"time"
 )
 
+// "GET :: /get_data?limit=some_int"
 func get_data(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		data := db.GetData(10)
+		keys, ok := r.URL.Query()["limit"]
+		if !ok || len(keys[0]) < 1 {
+			w.Write([]byte("missing limit param"))
+			return
+		}
+
+		limit, err := strconv.ParseInt(keys[0], 10, 8)
+		if err != nil {
+			log.Fatal("couldn't convert to int")
+		}
+		data := db.GetData(int8(limit))
 		// fmt.Println(data)
 		ret, err := json.Marshal(data)
 
